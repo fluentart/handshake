@@ -184,8 +184,6 @@ Solid style
   font-size: 1em;
   line-height: 1.231;
 
-  border-radius: 5px 5px 0 0;
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
 }
 .formoid-solid-blue label.title{
   font-size: 1em;
