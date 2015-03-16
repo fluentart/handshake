@@ -181,6 +181,9 @@ fieldset[disabled] .btn-xl.active {
   color: #3498db;
   outline: none;
 }
+
+
+
 .navbar-default .navbar-nav > .active > a {
   border-radius: 0;
   color: white;
