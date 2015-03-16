@@ -1,13 +1,16 @@
-var production = false;	
-
-if (process.env.NODE_ENV == "production") {
-	production = true;
-	console.log("\nSTARTING LAUNCHLAB in PRODUCTION mode. Enabled caching and emails.\n\n")
-} else {
-	console.log("\nSTARTING LAUNCHLAB in DEVELOPMENT mode. Use for production:\n\tsudo NODE_ENV=production nodemon server\n\n")
+var config = {
+	production : false,	//enable for compression etc
+	email : true,		//enable for email send/recieve
+	port: 3000,
+	domain: "bitlab.io",
+	sitename: "HandShake"
 }
 
-
+if (process.env.NODE_ENV == "production") {   
+	config.production = true;
+	console.log("\nSTARTING LAUNCHLAB in PRODUCTION mode. Enabled caching and emails.\n\n"); }
+	else { 
+	console.log("\nSTARTING LAUNCHLAB in DEVELOPMENT mode. Use for production:\n\tsudo NODE_ENV=production nodemon server\n\n"); }
 
 var express = require('express')
   , http = require('http')
@@ -25,7 +28,20 @@ var session = require('cookie-session')
 var compress = require('compression'); 
 var swig  = require('swig');
 
-//database
+// MAILBOT
+var mailbot = require('mailbot')
+mailbot.debug = true;	
+mailbot.domain = config.domain
+if (config.email) {
+	if (config.production == true) {
+		console.log("email server: started")
+		mailbot.server.listen(25, mailbot.domain);	
+	} else {
+		console.log("email server: not started")
+	}
+}
+
+// DATABASE
 var mongojs = require("mongojs");
 var databaseUrl = "handshake"; // "username:password@example.com/mydb"
 var collections = ["users"]
@@ -58,8 +74,8 @@ app.use(favicon(__dirname + '/public/favicon.ico'));
 app.engine('html', swig.renderFile);
 app.set('view engine', 'html');
 app.set('views', __dirname + '/views');
-app.set('view cache', production);
-if (production == true) {
+app.set('view cache', config.production);
+if (config.production == true) {
 	swig.setDefaults({ cache: 'memory' });
 } else {
 	swig.setDefaults({ cache: false });
@@ -71,7 +87,8 @@ if (production == true) {
 // SIGNUP
 
 app.get('/signup', function (req, res) {
-  res.render('signup', {})
+	console.log("#^@&$*(Y@#&$Y(@#$")
+    res.render('signup', {})
 })
 
 app.post('/signup', function (req, res) {
@@ -86,11 +103,37 @@ app.post('/signup', function (req, res) {
 
 	db.users.find( {email: req.body.email}, function (err, resp) {
 		if (resp.length == 0) {
-			console.log("email is new! go ahead");
-			db.users.save( newuser );
-			req.session.email = req.body.email;
-			req.session.secpass = encryptedhex;			
-			res.send("done")
+
+			console.log("new unique signup");
+			db.users.save( newuser, function (err, savedResp) {
+				console.log("saved")
+				console.log(savedResp._id);
+				//var ObjectId = mongojs.ObjectId;
+
+				req.session.email = req.body.email;
+				req.session.secpass = encryptedhex;			
+				
+				if (config.email == true) {	
+					var email = {}
+					email.from = "noreply@"+config.domain;
+					email.fromname = config.sitename;
+					email.rcpt = req.body.email;
+					email.rcptname = "";
+					email.subject = "Please verify your email address";
+
+					email.body = "Please click on the link below to verify your email.\n http://"+config.domain+"/verify/"+savedResp._id+"\n\n\n";
+					mailbot.sendemail(email, function (data) 
+					{
+						console.log("EMAIL SENT")
+					});
+					res.send("verifyemail");
+				} else {
+					res.send("done")	
+				}
+
+
+			} );
+
 		}
 		if (resp.length > 0) {
 			console.log("email exists! double signup?")
@@ -100,12 +143,35 @@ app.post('/signup', function (req, res) {
 	//  	
 })
 
+// EMAIL VERIFICATION
+
+app.get('/verify/:id', function (req,res) {
+	var ObjectId = mongojs.ObjectId;
+	if (req.params.id.length == 24) {
+		db.users.findOne( {"_id": ObjectId(req.params.id)}, function (err, resver) {
+			if (resver) {
+				resver.verified = true;
+				db.users.update({"_id": ObjectId(req.params.id)}, resver);
+				console.log("VERIFIED");
+				res.render('verify', {});
+			} else {
+				console.log("VERIFICATION FAILED");
+				res.render('error', {});
+			}
+		})
+	} else {
+		console.log("CODE TOO SHORT");
+		res.render('error', {});
+	}
+	
+});
+
 ///////////////////////////////////////////////////
 // SIGNIN
 
 app.get('/signin', function (req, res) {
   	res.render('signin', {})
-})
+});
 
 
 app.post('/signin', function (req, res) {
@@ -159,7 +225,13 @@ app.get('/', function (req, res) {
 		}
 		if (resp.length > 0) {
 			console.log("user found!")
-			res.render('app_home', { email: req.session.email })
+
+			if (resp[0].verified) {
+				res.render('app_home', { email: req.session.email })
+			} else {
+				res.render('notverified', { email: req.session.email })
+			}
+			
 		}
 	})
 
@@ -221,6 +293,6 @@ var server = http.createServer(app)
  
 
  
-server.listen(3000, function(){
-  console.log("Web server listening on port " + app.get('port'));
+server.listen(config.port, function(){
+  console.log("Web server   : started on port " + config.port);
 });
