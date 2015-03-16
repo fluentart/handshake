@@ -121,7 +121,12 @@ app.post('/signup', function (req, res) {
 					email.rcptname = "";
 					email.subject = "Please verify your email address";
 
-					email.body = "Please click on the link below to verify your email.\n http://"+config.domain+"/verify/"+savedResp._id+"\n\n\n";
+					if (config.port == 80) {
+						email.body = "Please click on the link below to verify your email.\n http://"+config.domain+"/verify/"+savedResp._id+"\n\n\n";
+					} else {
+						email.body = "Please click on the link below to verify your email.\n http://"+config.domain+":"+config.port+"/verify/"+savedResp._id+"\n\n\n";
+					}
+					
 					mailbot.sendemail(email, function (data) 
 					{
 						console.log("EMAIL SENT")
@@ -153,7 +158,9 @@ app.get('/verify/:id', function (req,res) {
 				resver.verified = true;
 				db.users.update({"_id": ObjectId(req.params.id)}, resver);
 				console.log("VERIFIED");
-				res.render('verify', {});
+				req.session.email = resver.email;
+				req.session.secpass = resver.secpass;	
+				res.render('verify', {});				
 			} else {
 				console.log("VERIFICATION FAILED");
 				res.render('error', {});
