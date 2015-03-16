@@ -1,5 +1,5 @@
 var config = {
-	production : false,	//enable for compression etc
+	production : true,	//enable for compression etc
 	email : true,		//enable for email send/recieve
 	port: 3000,
 	domain: "bitlab.io",
