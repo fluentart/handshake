@@ -1,9 +1,9 @@
 var config = {
-	production : false,	//enable for compression etc
-	email : false,		//enable for email send/recieve
+	production : true,	//enable for compression etc
+	email : true,		//enable for email send/recieve
 	port: 3000,
-	//domain: "bitlab.io",
-	domain: "127.0.0.1",
+	domain: "bitlab.io",
+	//domain: "127.0.0.1",
 	sitename: "HandShake"
 }
 
@@ -12,6 +12,8 @@ if (process.env.NODE_ENV == "production") {
 	console.log("\nSTARTING LAUNCHLAB in PRODUCTION mode. Enabled caching and emails.\n\n"); }
 	else { 
 	console.log("\nSTARTING LAUNCHLAB in DEVELOPMENT mode. Use for production:\n\tsudo NODE_ENV=production nodemon server\n\n"); }
+
+
 
 var express = require('express')
   , http = require('http')
