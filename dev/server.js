@@ -1,8 +1,9 @@
 var config = {
-	production : true,	//enable for compression etc
-	email : true,		//enable for email send/recieve
+	production : false,	//enable for compression etc
+	email : false,		//enable for email send/recieve
 	port: 3000,
-	domain: "bitlab.io",
+	//domain: "bitlab.io",
+	domain: "127.0.0.1",
 	sitename: "HandShake"
 }
 
@@ -292,6 +293,20 @@ app.get('/search', function (req, res) {
 		}
 	})
 
+})
+
+app.post('/search', function (req, res) {
+	console.log(req.body);
+	db.users.find( req.body, function (err, resp) {
+		for (var u in resp) {
+			delete resp[u].secpass
+		}
+		var searchresult = {}
+		searchresult.status = "success";
+		searchresult.data = resp;
+		console.log(searchresult);
+		res.json(searchresult);
+	})
 })
 
 ///////////////////////////////////////////////////////////

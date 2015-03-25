@@ -59,7 +59,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand page-scroll" href="/#page-top"><span style="color: #fff">Hand</span><span style="color: #bad72f">Shake</span></a>
+                <a class="navbar-brand page-scroll " href="#page-top" ><span style='color: #fff; font-family: "Montserrat", "Helvetica Neue", Helvetica, Arial, sans-serif; font-weight: 700;'>HANDSHAKE</a>
             </div>
 
             <!-- Collect the nav links, forms, and other content for toggling -->
@@ -112,7 +112,8 @@
 
                             <button id="submit" type="submit" value="Submit" class="submit pure-button pure-button-primary" style="margin-top: 1em;">Signin</button>
                         </fieldset>
-                        <a href="/signup">Signup for a new account</a>
+                        <a href="/recover">Forgot your password?</a><br>
+                        Don't have an account? <a href="/signup">Signup</a>
                     </div>                    
 
                     <p id="message" style="display: none;"></p>
@@ -132,7 +133,7 @@
         $(document).keypress(function(event){
             var keycode = (event.keyCode ? event.keyCode : event.which);
             if(keycode == '13'){
-                doSignup();
+                doSignin();
             }
         });
         

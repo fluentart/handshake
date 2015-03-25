@@ -159,8 +159,8 @@ fieldset[disabled] .btn-xl.active {
   border-color: rgba(255, 255, 255, 0.02);
 }
 .navbar-default .navbar-toggle {
-  background-color: #3498db;
-  border-color: #3498db;
+  background-color: #222222;
+  border-color: #222222;
 }
 .navbar-default .navbar-toggle .icon-bar {
   background-color: white;
