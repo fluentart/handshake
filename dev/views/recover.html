@@ -71,7 +71,7 @@
                     <li>
                         <a class="page-scroll" href="/">Home</a>
                     </li>                    
-                    <li class="active">
+                    <li>
                         <a class="page-scroll" href="/signin">Signin</a>
                     </li>
                     <li>
@@ -98,8 +98,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-12 text-center">
-                    <h2 class="section-heading" id="heading">SIGNIN</h2>
-
+                    <h2 class="section-heading" id="heading">RECOVER ACCOUNT</h2>
 
                     <div class="pure-form pure-form-stacked" id="signupform" >
                         <fieldset>
@@ -107,13 +106,8 @@
                             <label for="email">Email</label>
                             <input id="email" type="email" placeholder="Email" style="margin: 0 auto;">
 
-                            <label for="password">Password</label>
-                            <input id="password" type="password" placeholder="Password" style="margin: 0 auto;">
-
-                            <button id="submit" type="submit" value="Submit" class="submit pure-button pure-button-primary" style="margin-top: 1em;">Signin</button>
+                            <button id="submit" type="submit" value="Submit" class="submit pure-button pure-button-primary" style="margin-top: 1em;">Send recovery email</button>
                         </fieldset>
-                        <a href="/recover">Forgot your password?</a><br>
-                        Don't have an account? <a href="/signup">Signup</a>
                     </div>                    
 
                     <p id="message" style="display: none;"></p>
@@ -133,32 +127,31 @@
         $(document).keypress(function(event){
             var keycode = (event.keyCode ? event.keyCode : event.which);
             if(keycode == '13'){
-                doSignin();
+                doRecover();
             }
         });
         
         //CLICK BUTTON
         $("#submit").click(function(){
           console.log("clicked")
-          doSignin();            
+          doRecover();            
         });
         
     });
 
 
 
-var doSignin = function () {
+var doRecover = function () {
     //SIGNUP
-    var signin = {};
-    signin.email=$("#email").val();
-    signin.pass=$("#password").val();
+    var form = {};
+    form.email=$("#email").val();
 
 
-    $.post("/signin", signin, function(data)
+    $.post("/recover", form, function(data)
     {
         if(data==='notfound')
         {
-            $("#message").html('Email or password incorrect. Please try again or <a href="/recover">set a new password</a>.');
+            $("#message").html('Email or password incorrect. Please try again.');
             $("#message").show();
         }
 
@@ -166,7 +159,13 @@ var doSignin = function () {
         {
         $("#message").html('Success');
         $("#message").show();
-        window.location.replace("/");
+        //window.location.replace("/");
+        }
+
+        if(data==='emaildisabled')
+        {
+            $("#message").html('Error. Try again later.');
+            $("#message").show();
         }
     });        
 }

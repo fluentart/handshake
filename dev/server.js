@@ -2,7 +2,7 @@ var config = {
 	production : true,	//enable for compression etc
 	email : true,		//enable for email send/recieve
 	port: 3000,
-	domain: "bitlab.io",
+	//domain: "bitlab.io",
 	//domain: "127.0.0.1",
 	sitename: "HandShake"
 }
@@ -90,7 +90,6 @@ if (config.production == true) {
 // SIGNUP
 
 app.get('/signup', function (req, res) {
-	console.log("#^@&$*(Y@#&$Y(@#$")
     res.render('signup', {})
 })
 
@@ -115,8 +114,9 @@ app.post('/signup', function (req, res) {
 
 				req.session.email = req.body.email;
 				req.session.secpass = encryptedhex;			
-				
+				console.log(config.email);
 				if (config.email == true) {	
+					console.log("MAIL ENABLED, DOING VERIFICATION");
 					var email = {}
 					email.from = "noreply@"+config.domain;
 					email.fromname = config.sitename;
@@ -136,6 +136,7 @@ app.post('/signup', function (req, res) {
 					});
 					res.send("verifyemail");
 				} else {
+					console.log("MAIL DISABLED, SKIPPING VERIFICATION");
 					res.send("done")	
 				}
 
@@ -212,6 +213,96 @@ app.post('/signin', function (req, res) {
 
 ///////////////////////////////////////////////////
 
+app.get('/recover', function (req, res) {
+	res.render("recover", {});
+})
+
+app.post('/recover', function (req, res) {
+	console.log("USER RECOVER");
+	db.users.findOne( {email: req.body.email}, function (err, resp) {
+		console.log(resp);
+		if (resp == null) {			
+			res.send("notfound");
+		} else {
+			//SEND EMAIL
+			if (config.email == true) {	
+				
+				var email = {}
+				email.from = "noreply@"+config.domain;
+				email.fromname = config.sitename;
+				email.rcpt = req.body.email;
+				email.rcptname = "";
+				email.subject = "Account recovery";
+
+				if (config.port == 80) {
+					email.body = "Please click on the link below to set a new password.\n http://"+config.domain+"/newpass/"+resp._id+"\n\n\n";
+				} else {
+					email.body = "Please click on the link below to set a new password.\n http://"+config.domain+":"+config.port+"/newpass/"+resp._id+"\n\n\n";
+				}
+				
+				mailbot.sendemail(email, function (data) 
+				{
+					console.log("EMAIL SENT")
+					res.send("success");
+				});
+
+			} else {
+				res.send("emaildisabled")	
+			}
+			//END EMAIL
+		}
+		
+	})
+
+	//
+})
+
+app.get('/newpass/:id', function (req, res) {
+	console.log("NEWPASS FORM");
+	var ObjectId = mongojs.ObjectId;
+	if (req.params.id.length == 24) {
+		db.users.findOne( {"_id": ObjectId(req.params.id)}, function (err, resver) {
+			if (resver == null) {
+				res.render("error", {});
+			} else {
+				console.log(resver);
+				res.render("newpass", {});	
+			}
+			
+		});
+	} else {
+		res.render("error", {});
+	}
+	
+})
+
+app.post('/newpass/:id', function (req, res) {
+	console.log("SET NEW PASSWORD");
+	var ObjectId = mongojs.ObjectId;
+	if (req.params.id.length == 24) {
+		db.users.findOne( {"_id": ObjectId(req.params.id)}, function (err, resver) {
+			if (resver == null) {
+				res.send("error");
+			} else {
+				var encrypted = scrypt.crypto_scrypt(scrypt.encode_utf8(resver.email), scrypt.encode_utf8(req.body.pass), 128, 8, 1, 32);
+				var encryptedhex = scrypt.to_hex(encrypted);
+				resver.secpass = encryptedhex;
+				db.users.update( {"_id": ObjectId(req.params.id)}, resver, function (err, resp) {
+					req.session.email = resver.email;
+					req.session.secpass = encryptedhex;					
+					res.send("success");		
+				})
+				
+			}
+			
+		});
+	} else {
+		res.render("error", {});
+	}
+})
+
+///////////////////////////////////////////////////
+
 app.get('/signout', function (req, res) {
   delete req.session.email;
   delete req.session.secpass;
@@ -239,7 +330,14 @@ app.get('/', function (req, res) {
 			if (resp[0].verified) {
 				res.render('app_home', { email: req.session.email })
 			} else {
-				res.render('notverified', { email: req.session.email })
+				if (config.email == true) {	
+					console.log("MAIL ENABLED, ENFORCING VERIFICATION");
+					res.render('notverified', { email: req.session.email })
+				} else {
+					console.log("MAIL DISABLED, SKIPPING VERIFICATION");
+					res.render('app_home', { email: req.session.email })
+				}
+				
 			}
 			
 		}

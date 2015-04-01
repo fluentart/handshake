@@ -12,13 +12,13 @@
     <title>HandShake - Construction Professional Network</title>
 
     <!-- Bootstrap Core CSS -->
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link href="css/slider.css" rel="stylesheet">
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/slider.css" rel="stylesheet">
     <link href="/css/handshake.css" rel="stylesheet">
 
 
     <!-- Custom CSS -->
-    <link href="css/agency.css" rel="stylesheet">
+    <link href="/css/agency.css" rel="stylesheet">
 
     <!-- Custom Fonts -->
     <link href="font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
@@ -33,13 +33,13 @@
         <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
         <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
-  <link href="css/custom.css?v=1.0.2" rel="stylesheet">
-  <link href="skins/all.css?v=1.0.2" rel="stylesheet">
+  <link href="/css/custom.css?v=1.0.2" rel="stylesheet">
+  <link href="/skins/all.css?v=1.0.2" rel="stylesheet">
   
   <script src="/js/jquery.min.js">  </script>
   
-  <script src="icheck.js?v=1.0.2"></script>
-  <script src="js/custom.min.js?v=1.0.2"></script>
+  <script src="/icheck.js?v=1.0.2"></script>
+  <script src="/js/custom.min.js?v=1.0.2"></script>
   <link rel="stylesheet" href="/css/pure-min.css">
 
 
@@ -71,7 +71,7 @@
                     <li>
                         <a class="page-scroll" href="/">Home</a>
                     </li>                    
-                    <li class="active">
+                    <li>
                         <a class="page-scroll" href="/signin">Signin</a>
                     </li>
                     <li>
@@ -93,27 +93,24 @@
 
 
 
-
-    <section id="signin" class="bg-light-gray">
+    <!-- Services Section -->
+    <section id="signup" class="bg-light-gray">
         <div class="container">
             <div class="row">
                 <div class="col-lg-12 text-center">
-                    <h2 class="section-heading" id="heading">SIGNIN</h2>
+                    <h2 class="section-heading" id="heading">Set new password</h2>
 
 
                     <div class="pure-form pure-form-stacked" id="signupform" >
                         <fieldset>
 
-                            <label for="email">Email</label>
-                            <input id="email" type="email" placeholder="Email" style="margin: 0 auto;">
+                            <label for="password">Choose a new password. Type it twice.</label>
+                            <input id="password" type="text" placeholder="Password" style="margin: 0 auto;">
+                            <input id="password2" type="text" placeholder="Password again" style="margin: 0 auto;">
 
-                            <label for="password">Password</label>
-                            <input id="password" type="password" placeholder="Password" style="margin: 0 auto;">
-
-                            <button id="submit" type="submit" value="Submit" class="submit pure-button pure-button-primary" style="margin-top: 1em;">Signin</button>
+                            <button id="submit" type="submit" value="Submit" class="submit pure-button pure-button-primary" style="margin-top: 1em;" disabled>Save password</button>
                         </fieldset>
-                        <a href="/recover">Forgot your password?</a><br>
-                        Don't have an account? <a href="/signup">Signup</a>
+                        
                     </div>                    
 
                     <p id="message" style="display: none;"></p>
@@ -125,52 +122,112 @@
 
 
  <script>
+
+    var submitready = 0;
     
     $(document).ready(function(){
-        console.log("loaded");    
+        console.log("test");    
         
-        //PRESS ENTER
-        $(document).keypress(function(event){
+        //SIGNUP
+        
+
+        $("#submit").click( function () {
+            checkPass();
+            doNewpass();
+        });
+        //SIGNUP END
+
+        $(document).keyup(function(event){
+            checkPass();
             var keycode = (event.keyCode ? event.keyCode : event.which);
             if(keycode == '13'){
-                doSignin();
+                doNewpass();
             }
         });
-        
-        //CLICK BUTTON
-        $("#submit").click(function(){
-          console.log("clicked")
-          doSignin();            
-        });
-        
+
     });
 
+var checkPass = function() {
+    var p1 = $("#password").val();
+    var p2 = $("#password2").val();
+    console.log("checking pass");
 
-
-var doSignin = function () {
-    //SIGNUP
-    var signin = {};
-    signin.email=$("#email").val();
-    signin.pass=$("#password").val();
-
-
-    $.post("/signin", signin, function(data)
-    {
-        if(data==='notfound')
-        {
-            $("#message").html('Email or password incorrect. Please try again or <a href="/recover">set a new password</a>.');
-            $("#message").show();
-        }
-
-        if(data==='success')
-        {
-        $("#message").html('Success');
+    if (p1.length < 4) {
+        $("#message").html('Password too short');
         $("#message").show();
-        window.location.replace("/");
+        $("#submit").attr("disabled", "disabled");
+        submitready = 0;
+    } else {
+        if (p1 != p2) {
+            $("#message").html('Passwords do not match!');
+            $("#message").show();
+            $("#submit").attr("disabled", "disabled");
+            submitready = 0;
         }
-    });        
+
+        if (p1 == p2) {
+            $("#message").html('Password good.');
+            $("#message").show();   
+            $("#submit").removeAttr("disabled", "disabled");
+            submitready = 1;
+        }
+    }
+
 }
 
+
+
+ var doNewpass = function () {
+          var form = {};
+          console.log("asdasd")
+
+          form.pass=$("#password").val();
+          
+        if (submitready == 1) {
+          $.post(window.location.pathname, form, function(data){
+            
+            if(data==='exists')
+              {
+                //$("#signupform").hide();
+                $("#message").html('A user with that email address already exists on our records. Try to <a href="/signin">signin</a> instead?');
+                $("#message").show();
+
+                //alert("login success");
+              }
+
+            if(data==='verifyemail')
+              {
+                $("#signupform").hide();
+                $("#heading").html("VERIFY EMAIL")
+                $("#message").html('We need to verify your email address to be yours. Please check your inbox for the verification link. ');
+                $("#message").show();
+
+                //alert("login success");
+              }
+
+            if(data==='done')
+              {
+                $("#signupform").hide();
+                $("#heading").html("SUCCESS")
+                $("#message").html('Your account has been created! You can now <a href="/">continue</a>');
+                $("#message").show();
+
+                //alert("login success");
+              }
+
+              if(data==='success')
+              {
+                $("#signupform").hide();
+                $("#heading").html("SUCCESS")
+                $("#message").html('Your account password has been set! You can now <a href="/">continue</a>');
+                $("#message").show();
+
+                //alert("login success");
+              }
+
+             });
+            }
+        };//end func
 
 </script>
 
@@ -198,6 +255,7 @@ var doSignin = function () {
             console.log("click!")
           })
        
+
 
 
 
