@@ -32,7 +32,7 @@ var compress = require('compression');
 var swig  = require('swig');
 
 // MAILBOT
-var mailbot = require('mailbot')
+var mailbot = require('./lib/mailbot')
 mailbot.debug = true;	
 mailbot.domain = config.domain
 if (config.email) {
@@ -104,7 +104,8 @@ app.post('/signup', function (req, res) {
 	var newuser = { email: req.body.email, secpass: encryptedhex, time: Date.now() };
 
 	db.users.find( {email: req.body.email}, function (err, resp) {
-		if (resp.length == 0) {
+		if (resp) {
+			if (resp.length == 0) {
 
 			console.log("new unique signup");
 			db.users.save( newuser, function (err, savedResp) {
@@ -143,7 +144,8 @@ app.post('/signup', function (req, res) {
 
 			} );
 
-		}
+	      }
+     	}
 		if (resp.length > 0) {
 			console.log("email exists! double signup?")
 			res.send("exists")
