@@ -345,6 +345,9 @@ app.get('/', function (req, res) {
 				}
 				
 			}
+		} else {
+				console.log("user not found");
+				res.render('home', {})
 		}
 	})
 
