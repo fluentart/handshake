@@ -157,7 +157,9 @@ var doRecover = function () {
 
         if(data==='success')
         {
-        $("#message").html('Success');
+        $("#signupform").hide();
+        $("#heading").html("SUCCESS")
+        $("#message").html('Check your email for your account recovery link.');
         $("#message").show();
         //window.location.replace("/");
         }
