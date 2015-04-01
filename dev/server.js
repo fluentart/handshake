@@ -2,7 +2,7 @@ var config = {
 	production : true,	//enable for compression etc
 	email : true,		//enable for email send/recieve
 	port: 3000,
-	//domain: "bitlab.io",
+	domain: "bitlab.io",
 	//domain: "127.0.0.1",
 	sitename: "HandShake"
 }
