@@ -104,7 +104,7 @@ app.post('/signup', function (req, res) {
 	var newuser = { email: req.body.email, secpass: encryptedhex, time: Date.now() };
 
 	db.users.find( {email: req.body.email}, function (err, resp) {
-		if (resp) {
+		
 			if (resp.length == 0) {
 
 			console.log("new unique signup");
@@ -145,7 +145,7 @@ app.post('/signup', function (req, res) {
 			} );
 
 	      }
-     	}
+     	
 		if (resp.length > 0) {
 			console.log("email exists! double signup?")
 			res.send("exists")
@@ -322,26 +322,29 @@ app.get('/', function (req, res) {
 	var cookieuser = {email: req.session.email, secpass: req.session.secpass};
 
 	db.users.find( cookieuser, function (err, resp) {
-		if (resp.length == 0) {
-			console.log("user not found");
-			res.render('home', {})
-		}
-		if (resp.length > 0) {
-			console.log("user found!")
 
-			if (resp[0].verified) {
-				res.render('app_home', { email: req.session.email })
-			} else {
-				if (config.email == true) {	
-					console.log("MAIL ENABLED, ENFORCING VERIFICATION");
-					res.render('notverified', { email: req.session.email })
-				} else {
-					console.log("MAIL DISABLED, SKIPPING VERIFICATION");
+		if (resp) {
+			if (resp.length == 0) {
+				console.log("user not found");
+				res.render('home', {})
+			}
+			if (resp.length > 0) {
+				console.log("user found!")
+
+				if (resp[0].verified) {
 					res.render('app_home', { email: req.session.email })
+				} else {
+					if (config.email == true) {	
+						console.log("MAIL ENABLED, ENFORCING VERIFICATION");
+						res.render('notverified', { email: req.session.email })
+					} else {
+						console.log("MAIL DISABLED, SKIPPING VERIFICATION");
+						res.render('app_home', { email: req.session.email })
+					}
+					
 				}
 				
 			}
-			
 		}
 	})
 
