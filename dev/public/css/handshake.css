@@ -1,4 +1,18 @@
-.signup {
-
+@media (max-width: 992px) {
+  .intro-heading {
+    font-size: 3em;
+    line-height: 75px;
+    margin-bottom: 50px;    
+  }
+  .writeup {
+    padding: 1em;
+  }
 }
 
+@media (min-width: 992px) {
+  .intro-heading {
+    font-size: 5em;
+    line-height: 75px;
+    margin-bottom: 50px;    
+  }
+}
